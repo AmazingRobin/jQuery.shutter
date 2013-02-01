@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<title>jQuery仿动网先锋的首页百叶窗轮翻</title>
+	<link rel="stylesheet" type="text/css" href="../css/reset.css" media="all" />
+	<style type="text/css">
+	.slideBox { width: 100%; height: 440px; position:relative; overflow: hidden; margin: 0 auto;}
+	.slideList { position:relative; height: 376px; z-index: 0;}
+	.effect { position:absolute; left: 0; top: 0; width: 100%; height: 376px;}
+	.slideList li, .effect li { position:absolute; top: 0; left: 0;}
+	.slideList li a,  .effect li a { display:block;}
+	.btn-wrap { width: 100%; height: 64px; overflow:hidden; background:url(images/banner_bg03.jpg) center bottom no-repeat;}
+	.btn { position: relative; width:136px; height: 49px; margin: 8px auto; text-align: center; background:url(images/btn_bg.jpg) no-repeat;}
+	.btn span, .btn span.on { display:inline-block; width: 17px; height: 17px; margin: 16px 4px 0 0; cursor: pointer; background: url(images/btn.png) 2px -33px no-repeat;}
+	.btn span.on { background-position: -20px -35px;}
+	</style>
+</head>
+<body>
+	<!-- Header S -->
+	<h1 id="header">jQuery仿动网先锋的首页百叶窗轮翻</h1>
+	<!-- Header E -->
+	<!-- Demo S -->
+	<div class="slideBox">
+		<ul class="slideList">
+			<li><a href="javascript:;"><img src="images/photo1.jpg" alt="标题1" /></a></li>
+			<li><a href="javascript:;"><img src="images/photo2.jpg" alt="标题2" /></a></li>
+			<li><a href="javascript:;"><img src="images/photo3.jpg" alt="标题3" /></a></li>
+			<li><a href="javascript:;"><img src="images/photo4.jpg" alt="标题4" /></a></li>
+			<li><a href="javascript:;"><img src="images/photo5.jpg" alt="标题5" /></a></li>
+		</ul>
+	</div>
+	<!-- Demo E -->
+	<!-- Footer S -->
+	<div id="footer">DemoBox &copy;copyright 2012 by <a href="http://www.lisibin.org" class="bloger">Robin</a></div>
+	<!-- Footer E -->
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+	<script type="text/javascript">
+	$(function(){
+		var obj = $('.slideBox');
+		var list = obj.find('.slideList');
+		var lis = list.find('li');
+		var effect = '';
+		var size = list.find('li').size();
+		var curIndex = 0;
+		var w = list.width();
+		var h = list.height();
+		var sliceNum = 12;
+		var running = true;
+		var timer = '';
+
+		//克隆容器
+		var box = "<div class='effect'></div>";
+		obj.append(box);
+		var effBox = $('.effect');
+		
+		//生成按钮
+		var btnWrap = "<div class='btn-wrap'><div class='btn'>";
+		for ( var i = 0; i < size; i++){
+			btnWrap += "<span></span>";
+		}
+		btnWrap += "</div></div>";
+		obj.append(btnWrap);
+
+		//初始化图片的z-index
+		lis.each(function(n){
+			$(this).css({"z-index":size-n});
+		})
+
+		//点击事件
+		var btns = obj.find('.btn span');
+		btns.click(function(){
+			effect = parseInt(Math.random()*4);
+			if(!running) { return false;}
+			curIndex = $(this).index();
+			$(this).addClass('on').siblings().removeClass('on');
+			doEffect(curIndex);
+		})
+		btns.eq(0).addClass('on');
+		//自动执行
+		obj.hover(function(){
+			clearInterval(timer);
+		},function(){
+			timer = setInterval(function(){
+				curIndex++;
+				if (curIndex == size) { curIndex = 0};
+				btns.eq(curIndex).addClass('on').siblings().removeClass('on');
+				effect = parseInt(Math.random()*4);
+				doEffect(curIndex);
+			},2000)
+		}).trigger('mouseleave')
+		//效果函数
+		var doEffect = function(curNum){
+			running = false;
+			if (effect == 2 || effect == 3) {sliceNum = 8}else{sliceNum = 12};
+			var sliceW = Math.round(w/sliceNum)+1;
+			var sliceH = Math.round(h/sliceNum)+1;
+			switch(effect)
+			{
+				case 0:
+					for( var i = 0; i < sliceNum; i++){
+						var curClone = lis.eq(curNum).clone().appendTo(effBox).addClass('slideClone').css({width:0, height:h, left:sliceW*i, overflow:"hidden", opacity:0, "z-index":size+1});
+						curClone.find('img').css({"position":"absolute", "top":"0", "left":-sliceW*i})
+					}
+					effBox.find('.slideClone').each(function(n){
+						var ss = $(this);
+						setTimeout(function(){
+							ss.animate({ width:sliceW, height:h, opacity:"1"},500, "swing")
+						}, 70*n );
+					});
+				break;
+
+				case 1:
+					for( var i = 0; i < sliceNum; i++){
+						var curClone = lis.eq(curNum).clone().appendTo(effBox).addClass('slideClone').css({width:sliceW, height:0,left:sliceW*i, overflow:"hidden", opacity:0, "z-index":size+1});
+						curClone.find('img').css({"position":"absolute", "top":"0", "left":-sliceW*i})
+					}
+					effBox.find('.slideClone').each(function(n){
+						var ss = $(this);
+						setTimeout(function(){
+							ss.animate({ width:sliceW, height:h, opacity:"1"},500, "swing")
+						}, 70*n);
+					});
+				break;
+
+				case 2:
+
+					for( var i = 0; i < sliceNum; i++){
+						var curClone = lis.eq(curNum).clone().appendTo(effBox).addClass('slideClone').css({ width:0, height:sliceH, 
+							top:sliceH*i, left:"0", "overflow":"hidden", "opacity":"0", "z-index":size+1});
+						curClone.find('img').css({ "position":"absolute", "left":"0", "top":-sliceH*i})
+					}
+					effBox.find('.slideClone').each(function(n){
+						var ss = $(this);
+						setTimeout(function(){
+							ss.animate({ width:w, height:sliceH, opacity:"1"}, 500, "swing")
+						}, 70*n)
+					})
+				break;
+
+				case 3:
+					for( var i = 0; i < sliceNum; i++){
+						var curClone = lis.eq(curNum).clone().appendTo(effBox).addClass('slideClone').css({ width:w, height:0,
+							top:sliceH*i, left:sliceW*i, "overflow":"hidden", opacity:0, "z-index":size+1});
+						curClone.find('img').css({ "position":"absolute","top":-sliceH*i, left:"0"});
+					}
+					effBox.find('.slideClone').each(function(n){
+						var ss = $(this);
+						setTimeout(function(){
+							ss.animate({ width:w, height:sliceH, left:0, opacity:"1"}, 500, "swing")
+						}, 70*n)
+					})
+			}
+			//重置z-index
+			setTimeout(function(){
+				for( var i = 0; i < size; i++){
+					if(i == curNum){
+						lis.eq(i).css({"z-index":size});
+					}else{
+						lis.eq(i).css({"z-index":1});
+					}
+				}
+				running = true;
+			effBox.find('.slideClone').remove();
+			}, 70 * sliceNum +500)
+		}
+
+	})
+	</script>
+</body>
+</html>
